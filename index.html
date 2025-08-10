@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prank Virus Akka Sultan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+  html, body {
+    margin: 0; padding: 20px;
+    height: 100%;
+    background: #001177; /* Biru BSOD */
+    color: #fff; /* Putih */
+    font-family: 'Source Code Pro', monospace;
+    user-select: none;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #container {
+    max-width: 600px;
+    width: 100%;
+    position: relative;
+  }
+  .hidden { display: none; }
+  .loading-bar {
+    width: 100%;
+    height: 12px;
+    border: 1.5px solid #fff;
+    margin: 10px 0;
+    position: relative;
+  }
+  .loading-progress {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+  .countdown {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  .line {
+    white-space: pre-wrap;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    min-height: 7em;
+  }
+  input[type=text] {
+    background: #001177;
+    border: 1.5px solid #fff;
+    color: #fff;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.1rem;
+    padding: 6px 10px;
+    margin-top: 15px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .error-msg {
+    color: #ff5555;
+    margin-top: 8px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    min-height: 1.3em;
+  }
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    background: #fff;
+    animation: blink 1s step-start 0s infinite;
+    margin-left: 2px;
+    vertical-align: bottom;
+  }
+  @keyframes blink {
+    50% { background: transparent; }
+  }
+  /* Jedag-jedug halus */
+  @keyframes jedagJedug {
+    0%, 100% { transform: translate(0, 0) scale(1); filter: brightness(1); }
+    25% { transform: translate(-4px, -2px) scale(1.02); filter: brightness(0.9); }
+    50% { transform: translate(3px, 3px) scale(0.98); filter: brightness(1.1); }
+    75% { transform: translate(-3px, 2px) scale(1.01); filter: brightness(0.85); }
+  }
+  .jedag-jedug {
+    animation: jedagJedug 0.15s ease-in-out 4;
+  }
+  /* Blue screen style full */
+  #crashScreen {
+    position: fixed;
+    top:0; left:0;
+    width: 100vw; height: 100vh;
+    background: #001177;
+    color: #fff;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.2rem;
+    padding: 20px;
+    white-space: pre-wrap;
+    display: none;
+    overflow: auto;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <!-- Tahap 1: typing hacker text + loading bar -->
+  <div id="stage1" style="text-align:left;">
+    <div id="virusByAkka" style="font-weight:bold; font-size:1.2rem; margin-bottom:10px;">=== virus by Akka ===</div>
+    <div id="textLines" class="line"></div>
+    <div class="loading-bar" aria-label="Loading bar" style="margin-top: 15px;">
+      <div id="loadingProgress" class="loading-progress"></div>
+    </div>
+    <div id="loadingText" style="font-size:0.9rem; margin-top:5px;">Mengirim DDOS... 0.00 GB / 4.00 GB</div>
+  </div>
+
+  <!-- Tahap 2: countdown + password input -->
+  <div id="stage2" class="hidden" style="text-align:center;">
+    <div id="countdownText" style="font-size:2rem; font-weight:bold; color:#fff; font-family: monospace;">
+      MEMATIAN PONSEL ANDA...
+    </div>
+    <div style="margin-top:5px; font-family: monospace; font-size:1.2rem;" id="countdownLabel">
+      HITUNGAN MUNDUR
+    </div>
+    <div id="countdown" class="countdown">5</div>
+    <input type="text" id="passwordInput" placeholder="Masukkan kunci pembuka (tebak saja)" autocomplete="off" />
+    <div id="errorMsg" class="error-msg"></div>
+  </div>
+</div>
+
+<div id="crashScreen">
+SYSTEM CRASH ERROR
+
+A problem has been detected and your device has been shut down to prevent damage.
+
+Technical information:
+
+*** STOP: 0x0000007B (0xFFFFF880009A9928, 0xFFFFFFFFC0000034, 0x0000000000000000, 0x0000000000000000)
+
+Please restart your device.
+
+*** FakeBSOD by Akka & Walle ***
+</div>
+
+<script>
+  const stage1 = document.getElementById('stage1');
+  const stage2 = document.getElementById('stage2');
+  const stage3 = document.getElementById('crashScreen');
+  const container = document.getElementById('container');
+  const textLinesEl = document.getElementById('textLines');
+  const loadingBar = document.getElementById('loadingProgress');
+  const countdownEl = document.getElementById('countdown');
+  const passwordInput = document.getElementById('passwordInput');
+  const errorMsg = document.getElementById('errorMsg');
+  const countdownText = document.getElementById('countdownText');
+  const countdownLabel = document.getElementById('countdownLabel');
+
+  const hackerLines = [
+    "[init] >> Memulai proses...",
+    "[exec] >> Mengirim payload ke device target",
+    "[status] >> Mengirim DDOS attack - 0.00 GB / 4.00 GB",
+    "[warning] >> Melakukan exploit kernel...",
+    "[alert] >> MEMATIAN PONSEL ANDA..."
+  ];
+
+  let currentLine = 0;
+  let currentChar = 0;
+  let displayedLines = [];
+  let typingSpeed = 40;
+
+  function typeNextChar() {
+    if (currentLine >= hackerLines.length) {
+      startLoading();
+      return;
+    }
+    let line = hackerLines[currentLine];
+    if (!displayedLines[currentLine]) displayedLines[currentLine] = "";
+    displayedLines[currentLine] += line.charAt(currentChar);
+    textLinesEl.textContent = displayedLines.slice(0, currentLine+1).join("\n") + "█";
+
+    currentChar++;
+    if (currentChar >= line.length) {
+      currentLine++;
+      currentChar = 0;
+      setTimeout(typeNextChar, typingSpeed * 5);
+    } else {
+      setTimeout(typeNextChar, typingSpeed);
+    }
+  }
+
+  // Loading bar animation
+  function startLoading() {
+    let loadingPercent = 0;
+    const loadingDuration = 4000;
+    const loadingIntervalTime = 40;
+    const loadingSteps = loadingDuration / loadingIntervalTime;
+    let loadingStepCount = 0;
+
+    let interval = setInterval(() => {
+      loadingStepCount++;
+      loadingPercent = (loadingStepCount / loadingSteps) * 100;
+      loadingBar.style.width = loadingPercent + '%';
+
+      const gb = (loadingPercent / 100 * 4).toFixed(2);
+      displayedLines[2] = `[status] >> Mengirim DDOS attack - ${gb} GB / 4.00 GB`;
+      textLinesEl.textContent = displayedLines.join("\n") + "█";
+
+      if (loadingPercent >= 100) {
+        clearInterval(interval);
+        startStage2();
+      }
+    }, loadingIntervalTime);
+  }
+
+  let countdownTimer;
+  let countdownValue;
+
+  function startCountdown(seconds) {
+    countdownValue = seconds;
+    countdownEl.textContent = countdownValue;
+    countdownText.style.color = "#fff";
+    countdownLabel.style.color = "#fff";
+    errorMsg.textContent = "";
+    passwordInput.value = "";
+    passwordInput.focus();
+
+    countdownTimer = setInterval(() => {
+      countdownValue--;
+      countdownEl.textContent = countdownValue < 0 ? "0" : countdownValue;
+
+      if (countdownValue <= 3 && countdownValue >= 0) {
+        countdownText.style.color = "#ff5555";
+        countdownLabel.style.color = "#ff5555";
+      } else {
+        countdownText.style.color = "#fff";
+        countdownLabel.style.color = "#fff";
+      }
+
+      if (countdownValue < 0) {
+        clearInterval(countdownTimer);
+        showCrashScreen();
+      }
+    }, 1000);
+  }
+
+  function startStage2() {
+    stage1.classList.add('hidden');
+    stage2.classList.remove('hidden');
+    startCountdown(5);
+  }
+
+  passwordInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const val = passwordInput.value.trim();
+      if (val === "") {
+        errorMsg.textContent = "";
+      } else {
+        errorMsg.textContent = "Salah! Ini prank bro. Coba lagi atau tunggu hitungan mundur selesai.";
+        countdownValue = 5;
+        countdownEl.textContent = countdownValue;
+      }
+      passwordInput.value = "";
+      passwordInput.focus();
+    }
+  });
+
+  function showCrashScreen() {
+    stage2.classList.add('hidden');
+    container.style.display = 'none';
+    stage3.style.display = 'block';
+  }
+
+  typeNextChar();
+</script>
+</body>
+  </html>
